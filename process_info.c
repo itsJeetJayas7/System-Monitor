@@ -1,0 +1,135 @@
+#include "process_info.h"
+#include <stdio.h>
+#include <stdlib.h>
+
+/*/proc/pid/smaps*/
+void display_proc (int pid, long int cpu_time, char process_name[24], int program_size, char state) {
+  long int cpu_usage = cpu_time;
+  printf("Displaying Process(condensed)\n");
+  printf("_______________________________________________\n");
+  printf("Process Name\t Status\t CPU usage\t ID\t\t Memory\t\n");
+  printf("%s\t\t %c\t %ld\t\t %d\t\t %d\t\n", process_name, state, cpu_usage, pid, program_size);
+  printf("_______________________________________________\n\n");
+}
+
+void detailed_view (char process_name[24], char state, int memory, int virtual_memory, int resident_memory, int shared_memory, long int cpu_time, long long unsigned start_time, long int nice, long int priority, int pid) {
+  
+  printf("Detailed View\n");
+  printf("_______________________________________________\n");
+  printf(
+    "Process Name:\t\t %s\n"
+    "User:\t\t\t Unkown\n" // TODO: get user
+    "Status:\t\t\t %c\n"
+    "Memory:\t\t\t UNKNOWN%d\n" // TODO: get physcial memory usage
+    "Vitual Memory:\t\t %d\n"
+    "Resident Memory:\t %d\n"
+    "Shared Memory:\t\t %d\n"
+    "CPU time:\t\t %ld\n"
+    "time started:\t\t %llu\n"
+    "Nice:\t\t\t %ld\n"
+    "Priority:\t\t %ld\n"
+    "ID:\t\t\t %d\n",
+    process_name, state, memory, virtual_memory, resident_memory, shared_memory, cpu_time, start_time, nice, priority, pid
+  );
+  printf("_______________________________________________\n\n");
+}
+
+void print_stat(procinfo_t * info) {
+  printf("Stats Printed\n");
+  printf("_______________________________________________\n");
+  printf( 
+    "pid: %d\n"
+    "file name: %s\n"
+    "state: %c\n"
+    "ppid: %d\n"
+    "pgrp: %d\n" 
+    "session ID: %d\n"
+    "tty_nr: %d\n"
+    "tpgid: %d\n"
+    "flags: %u\n"
+    "minflt: %lu\n" 
+    "cminflt: %lu\n"
+    "majflt: %lu\n" 
+    "cmajflt: %lu\n" 
+    "utime: %lu\n"
+    "stime: %lu\n"
+    "cutime: %ld\n"
+    "cstime: %ld\n"
+    "priority: %ld\n"
+    "nice: %ld\n"
+    "numthreads: %ld\n"
+    "itrealvalue: %lu\n"
+    "starttime: %llu\n",
+    info->pid, info->process_name, info->state, info->ppid, info->pgrp, 
+    info->sid, info->tty_nr, info->tty_pgrp, info->flags, 
+    info->min_flt, info->cmin_flt, info->maj_flt, info->cmaj_flt, 
+    info->utime, info->stime, info->cutime, info->cstime, 
+    info->prio, info->nice, info->num_threads, info->itrealvalue, 
+    info->starttime
+  );
+  printf("_______________________________________________\n\n");
+}
+
+void print_smem (procinfo_t * info) {
+  printf("Memory Stats Printed\n");
+  printf("_______________________________________________\n");
+  printf(
+    "Memory: %d\n"
+    "resident: %d\n"
+    "shared mem size: %d\n",
+    info->program_size, info->resident_size, info->shared_mem
+  );
+  printf("_______________________________________________\n\n");
+}
+
+void * create_proc_info (procinfo_t * self_info, char * path) {
+  //open stat file path
+  char * stat_path = "/proc/2491349/stat";
+  FILE * stat_file = fopen(stat_path, "r");
+  
+  //scan relevent information
+  fscanf(stat_file, "%d %s %c %d %d %d %d %d %u %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %lu %llu", 
+  &self_info->pid, &self_info->process_name, &self_info->state, &self_info->ppid, &self_info->pgrp, &self_info->sid, 
+  &self_info->tty_nr, &self_info->tty_pgrp, &self_info->flags, &self_info->min_flt, &self_info->cmin_flt, 
+  &self_info->maj_flt, &self_info->cmaj_flt, &self_info->utime, &self_info->stime, &self_info->cutime, 
+  &self_info->cstime, &self_info->prio, &self_info->nice, &self_info->num_threads, &self_info->itrealvalue, 
+  &self_info->starttime);
+
+  //open statm file path
+  char * statm_path = "/proc/2491349/statm";
+  FILE * statm_file = fopen(statm_path, "r");
+  
+  //scan relevent information 
+  fscanf(statm_file, "%d %d %d ", 
+  &self_info->program_size, &self_info->resident_size, 
+  &self_info->shared_mem);
+
+
+
+}
+
+int main(int argc, char**argv) {
+  //TODO phys mem
+  int physical_memory_ph = 0;
+
+  procinfo_t * self_info = (procinfo_t *) malloc(sizeof(procinfo_t));
+
+  
+  create_proc_info(self_info, "/proc/self/");
+
+  
+  
+  printf("-----------------------------------------------\n\n");
+  print_smem(self_info);
+  printf("-----------------------------------------------\n\n");
+  print_stat(self_info);
+  printf("-----------------------------------------------\n\n");
+  long int cpu_time = self_info->cutime + self_info->cstime;
+  display_proc(self_info->pid, cpu_time, self_info->process_name, self_info->program_size, self_info->state);
+  printf("-----------------------------------------------\n\n");
+  detailed_view(self_info->process_name, self_info->state, physical_memory_ph, self_info->program_size, self_info->resident_size, 
+  self_info->shared_mem, cpu_time, self_info->starttime, self_info->nice, self_info->prio, self_info->pid);
+  
+  
+  
+}
