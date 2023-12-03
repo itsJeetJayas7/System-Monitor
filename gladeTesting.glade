@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.40.0 -->
+<interface>
+  <requires lib="gtk+" version="3.24"/>
+  <object class="GtkWindow" id="main_window">
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkFixed" id="gtk_fixed">
+        <property name="width-request">-1</property>
+        <property name="height-request">600</property>
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkStack" id="gtk_stack">
+            <property name="width-request">483</property>
+            <property name="height-request">555</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="transition-type">slide-left</property>
+            <child>
+              <object class="GtkFixed" id="page0">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkLabel" id="label_page0">
+                    <property name="width-request">100</property>
+                    <property name="height-request">80</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Yo Shawty! 
+  Wassup!</property>
+                  </object>
+                  <packing>
+                    <property name="y">100</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkImage" id="image">
+                    <property name="width-request">100</property>
+                    <property name="height-request">80</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="pixbuf">cool_kid.png</property>
+                  </object>
+                  <packing>
+                    <property name="x">100</property>
+                    <property name="y">20</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="os_name">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">osname</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Adelle Sans Devanagari weight=810 20"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="x">101</property>
+                    <property name="y">322</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="os_version">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">version</property>
+                  </object>
+                  <packing>
+                    <property name="x">115</property>
+                    <property name="y">358</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="kernel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">label</property>
+                  </object>
+                  <packing>
+                    <property name="x">115</property>
+                    <property name="y">373</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="hardware">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">hardware</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Adelle Sans Devanagari weight=780 14"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="x">101</property>
+                    <property name="y">391</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="memory">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">memory</property>
+                  </object>
+                  <packing>
+                    <property name="x">115</property>
+                    <property name="y">420</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="processor">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">processor</property>
+                  </object>
+                  <packing>
+                    <property name="x">115</property>
+                    <property name="y">433</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="system_info">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">System</property>
+                    <property name="wrap">True</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Adelle Sans Devanagari weight=780 14"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="x">101</property>
+                    <property name="y">449</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="disk">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">disk space</property>
+                  </object>
+                  <packing>
+                    <property name="x">115</property>
+                    <property name="y">475</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="name">page0</property>
+                <property name="title" translatable="yes">page0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFixed" id="page1">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkLabel" id="load_avg">
+                    <property name="width-request">180</property>
+                    <property name="height-request">30</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="refresh">
+                    <property name="label">gtk-refresh</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <property name="use-stock">True</property>
+                    <property name="always-show-image">True</property>
+                    <signal name="clicked" handler="on_button1_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="x">398</property>
+                    <property name="y">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkComboBoxText" id="combo_box">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="active">3</property>
+                    <property name="button-sensitivity">on</property>
+                    <property name="has-entry">True</property>
+                    <property name="active-id">1</property>
+                    <items>
+                      <item id="0" translatable="yes">Active Processes</item>
+                      <item id="1" translatable="yes">All Processes</item>
+                      <item id="2" translatable="yes">My Processes</item>
+                    </items>
+                    <child internal-child="entry">
+                      <object class="GtkEntry">
+                        <property name="can-focus">False</property>
+                        <property name="text" translatable="yes">All Processes</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="x">190</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="name">page1</property>
+                <property name="title" translatable="yes">page1</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFixed" id="page2">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkLabel" id="label_page">
+                    <property name="width-request">100</property>
+                    <property name="height-request">80</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">label for page 3</property>
+                  </object>
+                  <packing>
+                    <property name="x">188</property>
+                    <property name="y">228</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="name">page2</property>
+                <property name="title" translatable="yes">page2</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkFixed" id="page3">
+                <property name="visible">True</property>
+                <property name="can-focus">False</property>
+                <child>
+                  <object class="GtkLabel" id="label_page3">
+                    <property name="width-request">100</property>
+                    <property name="height-request">80</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Page 3, the goat!</property>
+                  </object>
+                  <packing>
+                    <property name="x">202</property>
+                    <property name="y">226</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="name">page3</property>
+                <property name="title" translatable="yes">page3</property>
+                <property name="position">3</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="x">4</property>
+            <property name="y">40</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkStackSwitcher" id="sw1">
+            <property name="width-request">0</property>
+            <property name="height-request">0</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="stack">gtk_stack</property>
+          </object>
+          <packing>
+            <property name="x">3</property>
+            <property name="y">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+  <object class="GtkWindow" id="open_files_window">
+    <property name="can-focus">False</property>
+    <child>
+      <object class="GtkFixed" id="fixed_open">
+        <property name="visible">True</property>
+        <property name="can-focus">False</property>
+        <child>
+          <object class="GtkLabel" id="temp">
+            <property name="width-request">100</property>
+            <property name="height-request">80</property>
+            <property name="visible">True</property>
+            <property name="can-focus">False</property>
+            <property name="label" translatable="yes">Hello from New Window</property>
+            <attributes>
+              <attribute name="font-desc" value="Adelle Sans Devanagari weight=810 50"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="x">1</property>
+            <property name="y">80</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
+</interface>
