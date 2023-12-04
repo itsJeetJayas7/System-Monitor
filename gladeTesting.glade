@@ -74,7 +74,7 @@
                     <property name="height-request">80</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="pixbuf">../Screen Shot 2023-12-03 at 12.20.59 AM.png</property>
+                    <property name="pixbuf">/cool_kid.png</property>
                   </object>
                   <packing>
                     <property name="x">100</property>
