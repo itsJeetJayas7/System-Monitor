@@ -1,6 +1,7 @@
 #include "process_info.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <dirent.h>
 
 /*/proc/pid/smaps*/
 void display_proc (int pid, long int cpu_time, char process_name[24], int program_size, char state) {
@@ -107,6 +108,45 @@ void * create_proc_info (procinfo_t * self_info, char * path) {
 
 
 }
+
+int * get_pid() {
+  DIR * dir = opendir("/proc/");
+    if (dir == NULL) {
+        perror("Error opening directory");
+        exit(EXIT_FAILURE);
+    }
+
+    // Count the number of entries in the directory
+    int count = 0;
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (atoi(entry->d_name) > 0) {
+            count++;
+        }
+    }
+
+    // Allocate memory based on the count
+    int* pids = malloc(count * sizeof(int));
+    if (pids == NULL) {
+        perror("Error allocating memory");
+        exit(EXIT_FAILURE);
+    }
+
+    // Reset the directory stream
+    rewinddir(dir);
+
+    // Read the process IDs
+    count = 0;
+    while ((entry = readdir(dir)) != NULL) {
+        if (atoi(entry->d_name) > 0) {
+            pids[count] = atoi(entry->d_name);
+            count++;
+        }
+    }
+    closedir(dir);
+    return pids;
+}
+
 
 int main(int argc, char**argv) {
   //TODO phys mem
