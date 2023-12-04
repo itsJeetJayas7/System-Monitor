@@ -1,7 +1,6 @@
 #ifndef PROCESS_INFO_H
 #define PROCESS_INFO_H
 
-
 typedef struct procinfo {
   //fields of stat
   int pid; 
@@ -70,5 +69,16 @@ typedef struct mem_map_info {
   int th_peligible;
   int protection_key;
 }mem_map_info_t;
+
+typedef struct mount {
+  char device[128];
+  char directory[128];
+  char type[32];
+  char total[32];
+  char available[32];
+  char used[32];
+  char percent[32];
+} mount_t;
+
 
 #endif

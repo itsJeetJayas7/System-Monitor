@@ -277,8 +277,37 @@ proc_list_t * list_view(int * pids) {
   return proc_list;
 }
 
+void create_mount(mount_t * mount, char * path) {
+  sscanf(path, "%s %s %s %s %s %s", mount->device, mount->total, mount->used, mount->available, mount->percent, mount->directory);
+  FILE *file;
+  char line [256];
+  file = fopen("/proc/mounts", "r");
+  while (fgets(line, sizeof(line), file) != NULL) {
+    if (strstr(line, mount->device) != NULL) {
+      sscanf(line, "%*s %*s %s", mount->type);
+      break;
+    }
+  }
+  fclose(file);
+}
+
 int main(int argc, char**argv) {
   //TODO phys mem
+  
+  FILE *fp;
+  char path[1035];
+  fp = popen("df -h", "r");
+  mount_t ** mount_list = (mount_t **) malloc(100* sizeof(mount_t*));
+  int count = 0;
+  fgets(path, sizeof(path)-1, fp);
+  while (fgets(path, sizeof(path)-1, fp) != NULL) {
+    mount_t * mount = (mount_t *) malloc(sizeof(mount_t));
+    create_mount(mount, path);
+    mount_list[count] = mount;
+    printf("%s %s %s %s %s %s %s\n", mount->device, mount->directory, mount->type, mount->total, mount->available, mount->used, mount->percent);
+    count++;
+  }
+
   int physical_memory_ph = 0;
 
   //procinfo_t * self_info = (procinfo_t *) malloc(sizeof(procinfo_t));
@@ -287,12 +316,13 @@ int main(int argc, char**argv) {
 
   int * pids = get_pid();
   proc_list_t * proc_list = list_view(pids);
-
+/*
   for (int i = 0; i < proc_list->count; i++) {
     if (proc_list->info_list[i] != NULL) {
       display_proc(0, proc_list->info_list[i]);
     }
   }
+*/
  /*
   // creats proc info stuct
   create_proc_info(self_info, "/proc/self/");
