@@ -7,8 +7,12 @@
 #include <unistd.h>   // POSIX operating system API
 #include <gtk/gtk.h>
 #include <sys/types.h>
-#include <sys/sysctl.h>
+//#include <sys/sysctl.h>
 #include <sys/mount.h>
+#include <sys/utsname.h>
+#include <sys/sysinfo.h>
+#include <sys/statvfs.h>
+#include <stdint.h>
 #include <gtk/gtkx.h>
 
 GtkWidget * window;
@@ -32,59 +36,73 @@ char cpuType[256];
 char diskInfo[256];
 
 void getSystemInfo() {
-    // Get OS name using sw_vers command
-    FILE *fp = popen("sw_vers -productName", "r");
-    if (fp == NULL) {
-        perror("popen");
-        exit(EXIT_FAILURE);
-    }
-
-    if (fgets(osName, sizeof(osName), fp) != NULL) {
-        // Remove newline character from the end
-        osName[strcspn(osName, "\n")] = '\0';
+    // Get OS name using sw_vers command 
+    struct utsname unameData;
+    if (uname(&unameData) == 0) {
+        snprintf(osName, sizeof(osName), "%s", unameData.sysname);
+        snprintf(osVersion, sizeof(osVersion), "%s %s", unameData.release, unameData.version);
     } else {
-        printf("Failed to retrieve OS name\n");
+        printf("Failed to retrieve OS information\n");
     }
-
-    pclose(fp);
-
-    // Get OS release version
-    char osV[256];
-    size_t len = sizeof(osVersion);
-    sysctlbyname("kern.osrelease", &osV, &len, NULL, 0);
-    char * temp3 = "OS Version: ";
-    strcat(osVersion, temp3);
-    strcat(osVersion, osV);
 
     // Get kernel version
     char kvers[256];
-    len = sizeof(kernelVersion);
-    sysctlbyname("kern.version", &kvers, &len, NULL, 0);
+    FILE *kernelFile = fopen("/proc/version", "r");
+    if (kernelFile != NULL) {
+        if (fgets(kvers, sizeof(kernelVersion), kernelFile) != NULL) {
+            // Remove newline character from the end
+            kvers[strcspn(kvers, "\n")] = '\0';
+        }
+        fclose(kernelFile);
+    } else {
+        printf("Failed to retrieve kernel version\n");
+    }
+    printf("\n\n|%s|\n\n", kvers);
     char * temp2 = "Kernel Version: ";
-    kvers[strcspn(kvers, ":")] = '\0';
+    kvers[strcspn(kvers, "(")] = '\0';
     strcat(kernelVersion, temp2);
     strcat(kernelVersion, kvers);
 
     // Get amount of memory
-    int mib[2] = {CTL_HW, HW_MEMSIZE};
-    uint64_t memSize;
-    size_t size = sizeof(memSize);
-    sysctl(mib, 2, &memSize, &size, NULL, 0);
-    snprintf(memorySize, sizeof(memorySize), "Memory Size: %.2f GiB", (double)memSize / (1 << 30));
+    struct sysinfo sysInfo;
+    if (sysinfo(&sysInfo) == 0) {
+        snprintf(memorySize, sizeof(memorySize), "Memory Size: %.2f GiB", (double)sysInfo.totalram / (1 << 30));
+    } else {
+        printf("Failed to retrieve memory information\n");
+    }
+
 
     // Get processor version
-    char cput[256];
-    len = sizeof(cpuType);
-    sysctlbyname("machdep.cpu.brand_string", &cput, &len, NULL, 0);
-    char * temp = "Processor Version: ";
-    strcat(cpuType, temp);
-    strcat(cpuType, cput);
+    FILE *cpuInfoFile = fopen("/proc/cpuinfo", "r");
+    if (cpuInfoFile != NULL) {
+        char line[256];
+        while (fgets(line, sizeof(line), cpuInfoFile) != NULL) {
+            if (strstr(line, "model name") != NULL) {
+                char *pos = strchr(line, ':');
+                if (pos != NULL) {
+                    snprintf(cpuType, sizeof(cpuType), "Processor Version: %s", pos + 2);
+                    break;
+                }
+            }
+        }
+        fclose(cpuInfoFile);
+    } else {
+        printf("Failed to retrieve CPU information\n");
+    }
+
+    
+    //char * temp = "Processor Version: ";
+    //strcat(cpuType, temp);
+    //strcat(cpuType, cput);
 
     // Get disk storage
-    struct statfs diskStats;
-    statfs("/", &diskStats);
-    uint64_t totalDiskSpace = diskStats.f_blocks * diskStats.f_bsize;
-    snprintf(diskInfo, sizeof(diskInfo), "Total Disk Space: %.2f GiB", (double)totalDiskSpace / (1 << 30));
+    struct statvfs diskStats;
+    if (statvfs("/", &diskStats) == 0) {
+        uint64_t totalDiskSpace = (uint64_t)diskStats.f_blocks * diskStats.f_frsize;
+        snprintf(diskInfo, sizeof(diskInfo), "Total Disk Space: %.2f GiB", (double)totalDiskSpace / (1 << 30));
+    } else {
+        printf("Failed to retrieve disk information\n");
+    }
 }
 
 void on_window_temp_destroy(GtkWidget *widget, gpointer user_data) {
