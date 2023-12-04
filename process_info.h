@@ -2,7 +2,6 @@
 #define PROCESS_INFO_H
 
 typedef struct procinfo {
-  
   //fields of stat
   int pid; 
   char process_name[24];
@@ -32,5 +31,38 @@ typedef struct procinfo {
   int resident_size; //resident size in vitual memory 
   int shared_mem; //shared memory size
 } procinfo_t;
+
+typedef struct mem_map_info {
+
+  //559a193c2000-559a193c4000 r--p 00000000 fd:00 1569845                    /bin/cat
+  char VM[32];
+  char flags[32];
+  char offset[32];
+  char dev[32];
+  char inode[32];
+  char file_name[1024];
+  int size;
+  int kernel_page_size;
+  int mmu_page_size;
+  int rss;
+  int pss;
+  int shared_clean;
+  int shared_dirty;
+  int private_clean;
+  int private_dirty;
+  int referenced;
+  int anonymous;
+  int lazy_free;
+  int anon_huge_pages;
+  int shmem_pmd_mapped;
+  int file_pmd_mapped;
+  int shared_hugetlb;
+  int private_hugetlb;
+  int swap;
+  int swap_pss;
+  int locked;
+  int th_peligible;
+  int protection_key;
+}mem_map_info_t;
 
 #endif
