@@ -85,9 +85,11 @@ void print_smem (procinfo_t * info) {
   printf("_______________________________________________\n\n");
 }
 
-void * create_proc_info (procinfo_t * self_info, char * path) {
+void create_proc_info (procinfo_t * self_info, int path) {
   //open stat file path
-  char * stat_path = "/proc/self/stat";
+  char stat_path[1024];
+  sprintf(stat_path,"/proc/%d/stat", path);
+  printf("%s\n", stat_path);
   FILE * stat_file = fopen(stat_path, "r");
   
   //scan relevent information
@@ -97,50 +99,27 @@ void * create_proc_info (procinfo_t * self_info, char * path) {
   &self_info->maj_flt, &self_info->cmaj_flt, &self_info->utime, &self_info->stime, &self_info->cutime, 
   &self_info->cstime, &self_info->prio, &self_info->nice, &self_info->num_threads, &self_info->itrealvalue, 
   &self_info->starttime);
-
-  //open statm file path
-  char * statm_path = "/proc/self/statm";
-  FILE * statm_file = fopen(statm_path, "r");
+  //print_stat(self_info);
   
+  //open statm file path
+  char statm_path[1024];
+  sprintf(statm_path,"/proc/%d/statm", path);
+  
+  FILE * statm_file = fopen(statm_path, "r");
+  printf("%s\n", statm_path);
   //scan relevent information 
-  fscanf(statm_file, "%d %d %d ", 
+  fscanf(statm_file, "%d %d %d", 
   &self_info->program_size, &self_info->resident_size, 
   &self_info->shared_mem);
+  
+  //print_smem(self_info);
+  
 }
 
 void creat_mem_info() {
   //open statm file path
   char * map_path = "/proc/self/smaps";
   FILE * smap_file = fopen(map_path, "r");
-  char VM[32];
-  char flags[32];
-  char offset[32];
-  char dev[32];
-  char inode[32];
-  char file_name[1024];
-  int size;
-  int kernel_page_size;
-  int mmu_page_size;
-  int rss;
-  int pss;
-  int shared_clean;
-  int shared_dirty;
-  int private_clean;
-  int private_dirty;
-  int referenced;
-  int anonymous;
-  int lazy_free;
-  int anon_huge_pages;
-  int shmem_pmd_mapped;
-  int file_pmd_mapped;
-  int shared_hugetlb;
-  int private_hugetlb;
-  int swap;
-  int swap_pss;
-  int locked;
-  int th_peligible;
-  int protection_key;
-  
 
   fscanf(smap_file, "%s %s %s %s %s %s\n", VM, flags, offset, dev, inode, file_name);
   fscanf(smap_file,
@@ -221,6 +200,16 @@ int * get_pid() {
     return pids;
 }
 
+void list_view(int * pids) {
+  int count = 6000;
+  procinfo_t ** info_list  = (procinfo_t **) malloc(5 * sizeof(procinfo_t *));
+  
+  for (int i = 0; i < 5; i++) {
+    
+    create_proc_info(info_list[i], pids[i]);
+  }
+}
+
 
 int main(int argc, char**argv) {
   //TODO phys mem
@@ -233,8 +222,9 @@ int main(int argc, char**argv) {
   // creats proc info stuct
   create_proc_info(self_info, "/proc/self/");
   
+  int * pids = get_pid();
+  list_view(pids);
 
-  creat_mem_info();
   
   /*
   printf("-----------------------------------------------\n\n");
