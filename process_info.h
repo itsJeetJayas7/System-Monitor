@@ -25,6 +25,9 @@ typedef struct procinfo {
   long int num_threads; //number of threads
   long int itrealvalue; //realvalue
   long long unsigned starttime; //start time inticks
+  long unsigned vsize; //virtual memory size
+  long unsigned rss; //physical memory size
+  double cpu_percent; //cpu percentage
   
   //fields of smem
   int program_size; //program size in virtual memory

@@ -93,13 +93,25 @@ int create_proc_info (procinfo_t * self_info, int path) {
   //printf("%s\n", stat_path);
   FILE * stat_file;
   if ((stat_file = fopen(stat_path, "r"))) {
-    fscanf(stat_file, "%d %s %c %d %d %d %d %d %u %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %lu %llu", 
+    fscanf(stat_file, "%d %s %c %d %d %d %d %d %u %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %lu %llu %lu %ld", 
       &self_info->pid, self_info->process_name, &self_info->state, &self_info->ppid, &self_info->pgrp, &self_info->sid, 
       &self_info->tty_nr, &self_info->tty_pgrp, &self_info->flags, &self_info->min_flt, &self_info->cmin_flt, 
       &self_info->maj_flt, &self_info->cmaj_flt, &self_info->utime, &self_info->stime, &self_info->cutime, 
       &self_info->cstime, &self_info->prio, &self_info->nice, &self_info->num_threads, &self_info->itrealvalue, 
-      &self_info->starttime);
+      &self_info->starttimem &self_info->vsize, &self_info->rss);
       fclose(stat_file);
+
+      FILE * uptime_file = fopen("/proc/uptime", "r");
+      double uptime_sec;
+      double utime_sec = self_info->utime / 100;
+      double stime_sec = self_info->stime / 100;
+      double start_time_sec = self_info->starttime / 100;
+      fscanf(uptime_file, "%lf ", &uptime_sec);
+      
+      double proc_elapse_sec = uptime_sec - start_time_sec;
+      double proc_usage_sec = utime_sec + stime_sec;
+      double proc_usage_percent = proc_usage_sec  * 100 / proc_elapse_sec;
+      self_info->cpu_percent = proc_usage_percent;
   } else {
      return 0;
   }
