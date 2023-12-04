@@ -1,6 +1,7 @@
 #ifndef PROCESS_INFO_H
 #define PROCESS_INFO_H
 
+
 typedef struct procinfo {
   //fields of stat
   int pid; 
@@ -31,6 +32,11 @@ typedef struct procinfo {
   int resident_size; //resident size in vitual memory 
   int shared_mem; //shared memory size
 } procinfo_t;
+
+typedef struct proc_list {
+  procinfo_t ** info_list;
+  int count;
+} proc_list_t;
 
 typedef struct mem_map_info {
 

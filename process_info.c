@@ -2,16 +2,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <dirent.h>
+#include <string.h>
 
 
 
 /*/proc/pid/smaps*/
-void display_proc (int pid, long int cpu_time, char process_name[24], int program_size, char state) {
+void display_proc (long int cpu_time, procinfo_t * info) {
   long int cpu_usage = cpu_time;
   printf("Displaying Process(condensed)\n");
   printf("_______________________________________________\n");
   printf("Process Name\t Status\t CPU usage\t ID\t\t Memory\t\n");
-  printf("%s\t\t %c\t %ld\t\t %d\t\t %d\t\n", process_name, state, cpu_usage, pid, program_size);
+  printf("%s\t\t %c\t %ld\t\t %d\t\t %d\t\n", info->process_name, info->state, cpu_usage, info->pid, info->program_size);
   printf("_______________________________________________\n\n");
 }
 
@@ -85,43 +86,57 @@ void print_smem (procinfo_t * info) {
   printf("_______________________________________________\n\n");
 }
 
-void create_proc_info (procinfo_t * self_info, int path) {
+int create_proc_info (procinfo_t * self_info, int path) {
   //open stat file path
   char stat_path[1024];
   sprintf(stat_path,"/proc/%d/stat", path);
-  printf("%s\n", stat_path);
-  FILE * stat_file = fopen(stat_path, "r");
-  
+  //printf("%s\n", stat_path);
+  FILE * stat_file;
+  if ((stat_file = fopen(stat_path, "r"))) {
+    fscanf(stat_file, "%d %s %c %d %d %d %d %d %u %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %lu %llu", 
+      &self_info->pid, self_info->process_name, &self_info->state, &self_info->ppid, &self_info->pgrp, &self_info->sid, 
+      &self_info->tty_nr, &self_info->tty_pgrp, &self_info->flags, &self_info->min_flt, &self_info->cmin_flt, 
+      &self_info->maj_flt, &self_info->cmaj_flt, &self_info->utime, &self_info->stime, &self_info->cutime, 
+      &self_info->cstime, &self_info->prio, &self_info->nice, &self_info->num_threads, &self_info->itrealvalue, 
+      &self_info->starttime);
+      fclose(stat_file);
+  } else {
+     return 0;
+  }
+   
   //scan relevent information
-  fscanf(stat_file, "%d %s %c %d %d %d %d %d %u %lu %lu %lu %lu %lu %lu %ld %ld %ld %ld %ld %lu %llu", 
-  &self_info->pid, self_info->process_name, &self_info->state, &self_info->ppid, &self_info->pgrp, &self_info->sid, 
-  &self_info->tty_nr, &self_info->tty_pgrp, &self_info->flags, &self_info->min_flt, &self_info->cmin_flt, 
-  &self_info->maj_flt, &self_info->cmaj_flt, &self_info->utime, &self_info->stime, &self_info->cutime, 
-  &self_info->cstime, &self_info->prio, &self_info->nice, &self_info->num_threads, &self_info->itrealvalue, 
-  &self_info->starttime);
-  //print_stat(self_info);
   
+  //print_stat(self_info);
+  //printf("%s\n", self_info->process_name);
   //open statm file path
   char statm_path[1024];
   sprintf(statm_path,"/proc/%d/statm", path);
-  
   FILE * statm_file = fopen(statm_path, "r");
-  printf("%s\n", statm_path);
-  //scan relevent information 
-  fscanf(statm_file, "%d %d %d", 
-  &self_info->program_size, &self_info->resident_size, 
-  &self_info->shared_mem);
+  if ((statm_file = fopen(statm_path, "r"))) {
+
+    //printf("%s\n", statm_path);
+    //scan relevent information 
+    fscanf(statm_file, "%d %d %d", 
+    &self_info->program_size, &self_info->resident_size, 
+    &self_info->shared_mem);
   
-  //print_smem(self_info);
+    //print_smem(self_info);
+    fclose(statm_file);
+    return 1;
+  }
+  else {
+    return 0;
+  }
   
 }
 
-void creat_mem_info() {
+void creat_mem_info(mem_map_info_t * mem_map) {
   //open statm file path
   char * map_path = "/proc/self/smaps";
   FILE * smap_file = fopen(map_path, "r");
+  
 
-  fscanf(smap_file, "%s %s %s %s %s %s\n", VM, flags, offset, dev, inode, file_name);
+  fscanf(smap_file, "%s %s %s %s %s %s\n", mem_map->VM, mem_map->flags, mem_map->offset, mem_map->dev, mem_map->inode, mem_map->file_name);
   fscanf(smap_file,
     "Size: %d kB\n"
     "KernelPageSize: %d kB\n"
@@ -135,29 +150,38 @@ void creat_mem_info() {
     "Referenced: %d kB\n"
     "Anonymous: %d kB\n"
     "LazyFree: %d kB\n"
-    "AnonHugePages: %d kB\n"
-    "ShmemPmdMapped: %d kB\n"
-    "FilePmdMapped: %d kB\n"
-    "Shared_Hugetlb: %d kB\n"
-    "Private_Hugetlb: %d kB\n"
-    "Swap: %d kB\n"
-    "SwapPss: %d kB\n"
-    "Locked: %d kB\n", 
-   &size, &kernel_page_size, &mmu_page_size, &rss, &pss, 
-   &shared_clean, &shared_dirty, &private_clean, &private_dirty, 
-   &referenced, &anonymous);
-   printf(
-    "Vm-stuff:%s\n" 
+    "AnonHugePages:  kB\n"
+    "ShmemPmdMapped:  kB\n"
+    "FilePmdMapped:  kB\n"
+    "Shared_Hugetlb: kB\n"
+    "Private_Hugetlb: kB\n"
+    "Swap: kB\n"
+    "SwapPss: kB\n"
+    "Locked: kB\n", 
+   &mem_map->size, &mem_map->kernel_page_size, &mem_map->mmu_page_size, &mem_map->rss, &mem_map->pss, 
+   &mem_map->shared_clean, &mem_map->shared_dirty, &mem_map->private_clean, &mem_map->private_dirty, 
+   &mem_map->referenced, &mem_map->anonymous, &mem_map->lazy_free);
+   
+   /*printf(
+    "Vm-stuff: %s\n" 
     "flags: %s\n"
     "offset: %s\n"
     "dev: %s\n"
     "inode: %s\n"
     "file_name %s\n"
     "SIZE: %d\n"
-    , VM, flags, offset, dev, inode, file_name, size);
-    
-  
-  
+    "Rss: %d kB\n"
+    "Pss: %d kB\n"
+    "Shared_Clean: %d kB\n"
+    "Shared_Dirty: %d kB\n"
+    "Private_Clean: %d kB\n"
+    "Private_Dirty: %d kB\n"
+    "Referenced: %d kB\n"
+    "Anonymous: %d kB\n"
+    "LazyFree: %d kB\n"
+    , mem_map->VM, mem_map->flags, mem_map->offset, mem_map->dev, mem_map->inode, mem_map->file_name, mem_map->size, mem_map->rss, mem_map->pss, 
+   mem_map->shared_clean, mem_map->shared_dirty, mem_map->private_clean, mem_map->private_dirty, 
+   mem_map->referenced, mem_map->anonymous, mem_map->lazy_free);*/
 }
 
 
@@ -196,37 +220,87 @@ int * get_pid() {
             count++;
         }
     }
+    
     closedir(dir);
     return pids;
 }
 
-void list_view(int * pids) {
-  int count = 6000;
-  procinfo_t ** info_list  = (procinfo_t **) malloc(5 * sizeof(procinfo_t *));
+void create_single_process_info( procinfo_t * info) {
+  info->pid = -999; 
+  strcpy(info->process_name, "");;
+  info->state = '~'; // R = Running; S = Sleeping, Z = Zombie, I = Idle
+  info->ppid = 0; // partent pid
+  info->pgrp = 0; // process group id
+  info->sid = 0; // session id
+  info->tty_nr = 0; // contoling terminal process
+  info->tty_pgrp = 0; // controling termianl forground process
+  info->flags  = 0; // flags 
+  info->min_flt  = 0; // minor fault
+  info->cmin_flt = 0; // minor faults children
+  info->maj_flt = 0; // major faults
+  info->cmaj_flt = 0; // major faults in children
+  info->utime = 0;
+  info->stime = 0;
+  info->cutime = 0; // cpu time in user land measured in clock ticks
+  info->cstime = 0; // cpu time in kearnal mode measured in clock ticks
+  info->prio = 0; //  priority value 
+  info->nice = 0; // nice value
+  info->num_threads = 0; //number of threads
+  info->itrealvalue = 0; //realvalue
+  info->starttime = 0; //start time inticks
   
-  for (int i = 0; i < 5; i++) {
-    
-    create_proc_info(info_list[i], pids[i]);
-  }
+  //fields of smem
+  info->program_size = 0; //program size in virtual memory
+  info->resident_size = 0; //resident size in vitual memory 
+  info->shared_mem = 0; //shared memory size
 }
 
+proc_list_t * list_view(int * pids) {
+  int count = 0;
+  proc_list_t * proc_list = (proc_list_t *) malloc(sizeof(proc_list_t));
+  while (pids[count] != 0) {
+    count++;
+  }
+  //printf("count: %d\n", count);
+  proc_list->info_list =(procinfo_t **) malloc((count * sizeof(procinfo_t *)));
+  proc_list->count = count;
+  for (int i = 0; i < count; i++) {
+    procinfo_t * info = (procinfo_t *) malloc(sizeof(procinfo_t));
+    create_single_process_info(info);
+    proc_list->info_list[i] = info;
+    int flag = create_proc_info(proc_list->info_list[i], pids[i]);
+    if (flag == 0) {
+      free(proc_list->info_list[i]);
+      proc_list->info_list[i] = NULL;
+    } 
+  }
+  return proc_list;
+}
 
 int main(int argc, char**argv) {
   //TODO phys mem
   int physical_memory_ph = 0;
 
-  procinfo_t * self_info = (procinfo_t *) malloc(sizeof(procinfo_t));
-  //mem_map_info_t * mem_map = (mem_map_info_t *) malloc(sizeof(mem_map_info_t));
+  //procinfo_t * self_info = (procinfo_t *) malloc(sizeof(procinfo_t));
+  
+  mem_map_info_t * mem_map = (mem_map_info_t *) malloc(sizeof(mem_map_info_t));
 
+  int * pids = get_pid();
+  proc_list_t * proc_list = list_view(pids);
 
+  for (int i = 0; i < proc_list->count; i++) {
+    if (proc_list->info_list[i] != NULL) {
+      display_proc(0, proc_list->info_list[i]);
+    }
+  }
+ /*
   // creats proc info stuct
   create_proc_info(self_info, "/proc/self/");
   
-  int * pids = get_pid();
-  list_view(pids);
 
+  creat_mem_info(mem_map);
   
-  /*
+  
   printf("-----------------------------------------------\n\n");
   
   // prints the smem data
@@ -250,7 +324,18 @@ int main(int argc, char**argv) {
   //detailed veiw of proc 
   detailed_view(self_info->process_name, self_info->state, physical_memory_ph, self_info->program_size, self_info->resident_size, 
   self_info->shared_mem, cpu_time, self_info->starttime, self_info->nice, self_info->prio, self_info->pid);
-  
-l  */
+  */
+ for (int i = 0; pids[i] != 0; i++) {
+    if (proc_list->info_list[i] != NULL) {
+      free(proc_list->info_list[i]);
+      proc_list->info_list[i] == NULL;
+    }
+ }
+ free(proc_list->info_list);
+ free(proc_list);
+ proc_list->info_list = NULL;
+ proc_list = NULL;
+ free(pids);
+ pids = NULL;
   
 }
