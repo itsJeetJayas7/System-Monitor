@@ -2,6 +2,40 @@
 <!-- Generated with glade 3.40.0 -->
 <interface>
   <requires lib="gtk+" version="3.24"/>
+  <object class="GtkTreeStore" id="fs_treeStore">
+    <columns>
+      <!-- column-name colum1 -->
+      <column type="gchararray"/>
+      <!-- column-name colum2 -->
+      <column type="gchararray"/>
+      <!-- column-name colum3 -->
+      <column type="gchararray"/>
+      <!-- column-name colum4 -->
+      <column type="gchararray"/>
+      <!-- column-name colum5 -->
+      <column type="gchararray"/>
+      <!-- column-name colum6 -->
+      <column type="gchararray"/>
+      <!-- column-name gchararray1 -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkListStore" id="liststore1">
+    <columns>
+      <!-- column-name Column1 -->
+      <column type="gchararray"/>
+      <!-- column-name column2 -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkTreeStore" id="tree_store">
+    <columns>
+      <!-- column-name c1 -->
+      <column type="gchararray"/>
+      <!-- column-name c2 -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
   <object class="GtkWindow" id="main_window">
     <property name="can-focus">False</property>
     <child>
@@ -40,7 +74,7 @@
                     <property name="height-request">80</property>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
-                    <property name="pixbuf">cool_kid.png</property>
+                    <property name="pixbuf">/cool_kid.png</property>
                   </object>
                   <packing>
                     <property name="x">100</property>
@@ -148,7 +182,7 @@
               </object>
               <packing>
                 <property name="name">page0</property>
-                <property name="title" translatable="yes">page0</property>
+                <property name="title" translatable="yes">Resources</property>
               </packing>
             </child>
             <child>
@@ -162,6 +196,10 @@
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                   </object>
+                  <packing>
+                    <property name="x">4</property>
+                    <property name="y">4</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkButton" id="refresh">
@@ -175,7 +213,7 @@
                   </object>
                   <packing>
                     <property name="x">398</property>
-                    <property name="y">1</property>
+                    <property name="y">4</property>
                   </packing>
                 </child>
                 <child>
@@ -192,7 +230,7 @@
                       <item id="2" translatable="yes">My Processes</item>
                     </items>
                     <child internal-child="entry">
-                      <object class="GtkEntry">
+                      <object class="GtkEntry" id="combo_vals">
                         <property name="can-focus">False</property>
                         <property name="text" translatable="yes">All Processes</property>
                       </object>
@@ -200,12 +238,54 @@
                   </object>
                   <packing>
                     <property name="x">190</property>
+                    <property name="y">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScrolledWindow" id="scroll_window">
+                    <property name="width-request">475</property>
+                    <property name="height-request">505</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="shadow-type">in</property>
+                    <child>
+                      <object class="GtkViewport" id="view_port">
+                        <property name="width-request">474</property>
+                        <property name="height-request">500</property>
+                        <property name="visible">True</property>
+                        <property name="can-focus">False</property>
+                        <child>
+                          <object class="GtkTreeView" id="tree_mai">
+                            <property name="visible">True</property>
+                            <property name="can-focus">True</property>
+                            <property name="model">tree_store</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="select"/>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="col1">
+                                <property name="title" translatable="yes">Process Name</property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="col2">
+                                <property name="title" translatable="yes">Data</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="x">4</property>
+                    <property name="y">44</property>
                   </packing>
                 </child>
               </object>
               <packing>
                 <property name="name">page1</property>
-                <property name="title" translatable="yes">page1</property>
+                <property name="title" translatable="yes">Processes</property>
                 <property name="position">1</property>
               </packing>
             </child>
@@ -229,7 +309,7 @@
               </object>
               <packing>
                 <property name="name">page2</property>
-                <property name="title" translatable="yes">page2</property>
+                <property name="title" translatable="yes">Resources</property>
                 <property name="position">2</property>
               </packing>
             </child>
@@ -238,22 +318,24 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
-                  <object class="GtkLabel" id="label_page3">
-                    <property name="width-request">100</property>
-                    <property name="height-request">80</property>
+                  <object class="GtkTreeView" id="fs_tree">
+                    <property name="width-request">475</property>
+                    <property name="height-request">530</property>
                     <property name="visible">True</property>
-                    <property name="can-focus">False</property>
-                    <property name="label" translatable="yes">Page 3, the goat!</property>
+                    <property name="can-focus">True</property>
+                    <child internal-child="selection">
+                      <object class="GtkTreeSelection"/>
+                    </child>
                   </object>
                   <packing>
-                    <property name="x">202</property>
-                    <property name="y">226</property>
+                    <property name="x">4</property>
+                    <property name="y">18</property>
                   </packing>
                 </child>
               </object>
               <packing>
                 <property name="name">page3</property>
-                <property name="title" translatable="yes">page3</property>
+                <property name="title" translatable="yes">File Systems</property>
                 <property name="position">3</property>
               </packing>
             </child>
@@ -274,31 +356,6 @@
           <packing>
             <property name="x">3</property>
             <property name="y">3</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="open_files_window">
-    <property name="can-focus">False</property>
-    <child>
-      <object class="GtkFixed" id="fixed_open">
-        <property name="visible">True</property>
-        <property name="can-focus">False</property>
-        <child>
-          <object class="GtkLabel" id="temp">
-            <property name="width-request">100</property>
-            <property name="height-request">80</property>
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="label" translatable="yes">Hello from New Window</property>
-            <attributes>
-              <attribute name="font-desc" value="Adelle Sans Devanagari weight=810 50"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="x">1</property>
-            <property name="y">80</property>
           </packing>
         </child>
       </object>
