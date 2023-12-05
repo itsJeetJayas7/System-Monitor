@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <dirent.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 
 /* Displays process information of a signal PID */
@@ -399,29 +402,74 @@ proc_list_t * list_view(int * pids) {
   return proc_list;
 }
 
-/*
-void open_file_list(fd_info_t * fd_list) {
+
+
+fd_list_t * open_file_list(int pid) {
+  
+  fd_list_t * fd_list = (fd_list_t *) malloc(sizeof(fd_list_t));
+
   char fd_dir_path[1024];
   sprintf(fd_dir_path,"/proc/%d/fd", pid);
 
   DIR * fd_dir = opendir(fd_dir_path);
   struct dirent * dir_struc;
-  file_ct = 0;
 
-  while(dir_struc = readdir(fd_dir) != NULL) {
-    if (strcmp(dir_struc->d_name, ".") || strcmp(dir_struc->d_name, "..")) {
+  fd_list->count = 0;
+  fd_list->fd_array =(fd_info_t **) malloc(((fd_list->count + 5) * sizeof(fd_info_t *)));
+
+  while((dir_struc = readdir(fd_dir)) != NULL) {
+    
+    if (!strcmp(dir_struc->d_name, ".")) {
+      
       continue;
     }
-    
+    if (!strcmp(dir_struc->d_name, "..") != 0) {
+      
+      continue;
+    }
+
+    fd_list->fd_array =(fd_info_t **)  realloc(fd_list->fd_array, ((fd_list->count + 5) * sizeof(fd_info_t *)));
+    fd_info_t * fd_information = (fd_info_t *) malloc(sizeof(fd_info_t));
+
     char fd_path[1024];
-    sprintf(fd_path, "%s/%s", fd_dir_path, dir_struc->d_name);
-
+    sprintf(fd_path, "/proc/%d/fd/%s", pid, dir_struc->d_name);
     char link_path[1024];
-    readlink(fd_path, link_path, sizeof(link_path) - 1);
+    int link_len = readlink(fd_path, link_path, sizeof(link_path));
+    link_path[link_len] = '\0';
 
+    fd_information->fd = atoi(dir_struc->d_name);
+    sprintf(fd_information->object, "%s", link_path);
+    
+    struct stat sb;
+    int ret_val = lstat(link_path, &sb);
+    switch (sb.st_mode & S_IFMT) {
+      case S_IFDIR:  
+        sprintf(fd_information->type, "%s", "directory");
+        break;
+      case S_IFIFO:
+        sprintf(fd_information->type, "%s", "pipe");
+        break;
+      case S_IFLNK:
+        sprintf(fd_information->type, "%s", "symlink");
+        break;
+      case S_IFREG:
+        sprintf(fd_information->type, "%s", "file");
+        break;
+      case S_IFSOCK:
+        sprintf(fd_information->type, "%s", "socket");
+        break;
+      default:
+        sprintf(fd_information->type, "%s", "file");
+        break;
+    }
+
+    fd_list->fd_array[fd_list->count] = fd_information;
+    fd_list->count++;
   }
 
-}*/
+  return fd_list;
+
+}
 
 void create_mount(mount_t * mount, char * path) {
   sscanf(path, "%s %s %s %s %s %s", mount->device, mount->total, mount->used, mount->available, mount->percent, mount->directory);
@@ -438,7 +486,7 @@ void create_mount(mount_t * mount, char * path) {
 }
 
 int main(int argc, char**argv) {
-
+  fd_list_t * fd_list = open_file_list(1047644);
   //procinfo_t * self_info = (procinfo_t *) malloc(sizeof(procinfo_t));
   mem_map_info_t * mem_map = (mem_map_info_t *) malloc(sizeof(mem_map_info_t));
 
@@ -452,7 +500,7 @@ int main(int argc, char**argv) {
     mount_t * mount = (mount_t *) malloc(sizeof(mount_t));
     create_mount(mount, path);
     mount_list[count] = mount;
-    printf("%s %s %s %s %s %s %s\n", mount->device, mount->directory, mount->type, mount->total, mount->available, mount->used, mount->percent);
+    //printf("%s %s %s %s %s %s %s\n", mount->device, mount->directory, mount->type, mount->total, mount->available, mount->used, mount->percent);
     count++;
   }
 
@@ -460,7 +508,7 @@ int main(int argc, char**argv) {
   proc_list_t * proc_list = list_view(pids);
 
   mem_map_list_t * mmap_list = create_mem_info(1047644);
-  
+ /*
  for (int i = 0; pids[i] != 0; i++) {
     if (proc_list->info_list[i] != NULL) {
       free(proc_list->info_list[i]);
@@ -473,5 +521,6 @@ int main(int argc, char**argv) {
  proc_list = NULL;
  free(pids);
  pids = NULL;
-  
+ */
+
 }

@@ -89,12 +89,12 @@ typedef struct mem_map_list {
 
 typedef struct fd_info {
   int fd;
-  char type[128];
-  char object[128];
+  char type[1024];
+  char object[1024];
 } fd_info_t;
 
 typedef struct fd_list {
-  fd_info_t fd_array[100];
+  fd_info_t ** fd_array;
   int count;
 } fd_list_t;
 
