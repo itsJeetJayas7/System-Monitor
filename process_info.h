@@ -3,9 +3,22 @@
 
 
 typedef struct procinfo {
+  char state_str[32];
+  char cpu_perc_str[32];
+  char pid_str[32];
+  char phys_mem_str[32];
+  char virtual_mem_str[32];
+  char resident_mem_str[32];
+  char shared_mem_str[32];
+  char cpu_time_str[32];
+  char nice_str[32];
+  char prio_str[32];
+
+  
+  
   //fields of stat
   int pid; 
-  char process_name[24];
+  char process_name[32];
   char state; // R = Running; S = Sleeping, Z = Zombie, I = Idle
   int ppid; // partent pid
   int pgrp; // process group id
@@ -91,6 +104,7 @@ typedef struct fd_info {
   int fd;
   char type[1024];
   char object[1024];
+  char fd_str[16];
 } fd_info_t;
 
 typedef struct fd_list {

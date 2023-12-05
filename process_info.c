@@ -9,12 +9,32 @@
 
 
 /* Displays process information of a signal PID */
-void display_proc (long int cpu_time, procinfo_t * info) {
-  long int cpu_usage = cpu_time;
-  printf("Displaying Process(condensed)\n");
+void display_proc (procinfo_t * info) {
+  
+  
   printf("_______________________________________________\n");
-  printf("Process Name\t Status\t CPU usage\t ID\t\t Memory\t\n");
-  printf("%s\t\t %c\t %ld\t\t %d\t\t %d\t\n", info->process_name, info->state, cpu_usage, info->pid, info->program_size);
+  printf(
+    "Process Name: %s\n"
+    "Status: %s\n"
+    "%%CPU: %s\n"
+    "PID: %s\n\n\n"
+    "Process Name: %s\n"
+    "User: NEEDS TO BE ADDED\n"
+    "Status: %s\n"
+    "Memory: %s\n"
+    "Virtual: %s\n"
+    "Resident: %s\n"
+    "Shared: %s\n"
+    "%%CPU: %s\n"
+    "CPU time: %s\n"
+    "Nice: %s\n"
+    "Priority %s\n",
+    info->process_name, info->state_str, info->cpu_perc_str, info->pid_str,
+    info->process_name, info->state_str, info->phys_mem_str, info->virtual_mem_str,
+    info->resident_mem_str, info->shared_mem_str, info->cpu_perc_str,
+    info->cpu_time_str, info->nice_str, info->prio_str 
+    );
+    
   printf("_______________________________________________\n\n");
 }
 
@@ -351,7 +371,59 @@ int * get_pid() {
     return pids;
 }
 
-void create_single_process_info( procinfo_t * info) {
+void format_single_process_info(procinfo_t * info) {
+  sprintf(info->pid_str, "%d", info->pid);
+  sprintf(info->cpu_perc_str, "%.2f", info->cpu_percent);
+  double rss_mb = (info->rss * 4) / 1024.0;
+  sprintf(info->phys_mem_str, "%.1f", rss_mb);
+  double virt_mem_mb = (info->program_size * 4) / 1024.0;
+  sprintf(info->virtual_mem_str, "%.1f", virt_mem_mb);
+
+  double res_mem_mb = (info->resident_size * 4) / 1024.0;
+  sprintf(info->resident_mem_str, "%.1f", res_mem_mb);
+
+  double shared_mem_mb = (info->shared_mem * 4) / 1024.0;
+  sprintf(info->shared_mem_str, "%.1f", shared_mem_mb);
+
+  double cpu_time = info->utime + info->stime;
+  cpu_time = cpu_time / 100;
+
+  int hr = cpu_time / (60 * 60);
+  int min = ((cpu_time - (hr * 60 * 60)) / 60);
+
+  sprintf(info->cpu_time_str, "%d:%d", hr, min);
+  sprintf(info->nice_str, "%ld", info->nice);
+  sprintf(info->prio_str, "%ld", info->prio);
+
+  
+
+  if (info->state == 'R') {
+    strcpy(info->state_str, "Running");
+  }
+  else if (info->state == 'S') {
+     strcpy(info->state_str, "Sleeping");
+  }
+  else if (info->state == 'Z') {
+     strcpy(info->state_str, "Zombie");
+  }
+  else if (info->state == 't') {
+     strcpy(info->state_str, "Trace Pause");
+  }
+  else if (info->state == 'X') {
+     strcpy(info->state_str, "Dead");
+  }
+  else if (info->state == 'I') {
+     strcpy(info->state_str, "Idle");
+  }
+  else {
+    sprintf(info->state_str, "%c", info->state);
+  }
+  
+  
+
+}
+
+void create_single_process_info( procinfo_t * info) { 
   info->pid = -999; 
   strcpy(info->process_name, "");
   info->state = '~'; // R = Running; S = Sleeping, Z = Zombie, I = Idle
@@ -399,6 +471,7 @@ proc_list_t * list_view(int * pids) {
       free(proc_list->info_list[i]);
       proc_list->info_list[i] = NULL;
     } 
+    format_single_process_info(info);
   }
   return proc_list;
 }
@@ -437,6 +510,9 @@ fd_list_t * open_file_list(int pid) {
     char link_path[1024];
     int link_len = readlink(fd_path, link_path, sizeof(link_path));
     link_path[link_len] = '\0';
+
+    strcpy(fd_information->fd_str, dir_struc->d_name);
+
 
     fd_information->fd = atoi(dir_struc->d_name);
     sprintf(fd_information->object, "%s", link_path);
@@ -509,6 +585,12 @@ int main(int argc, char**argv) {
   proc_list_t * proc_list = list_view(pids);
 
   mem_map_list_t * mmap_list = create_mem_info(1047644);
+  /*
+  for (int i = 0; i < proc_list->count; i++) {
+    if (proc_list->info_list[i] != NULL) {
+      display_proc(proc_list->info_list[i]);
+    }
+  } */
   /*printf("%d\n", mmap_list->count);
   for (int i = 0; i < mmap_list->count; i++) {
     printf("vm_start %s\n", mmap_list->maps_list[i]->vm_start);
