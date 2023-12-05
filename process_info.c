@@ -399,15 +399,62 @@ proc_list_t * list_view(int * pids) {
   return proc_list;
 }
 
+/*
+void open_file_list(fd_info_t * fd_list) {
+  char fd_dir_path[1024];
+  sprintf(fd_dir_path,"/proc/%d/fd", pid);
 
+  DIR * fd_dir = opendir(fd_dir_path);
+  struct dirent * dir_struc;
+  file_ct = 0;
+
+  while(dir_struc = readdir(fd_dir) != NULL) {
+    if (strcmp(dir_struc->d_name, ".") || strcmp(dir_struc->d_name, "..")) {
+      continue;
+    }
+    
+    char fd_path[1024];
+    sprintf(fd_path, "%s/%s", fd_dir_path, dir_struc->d_name);
+
+    char link_path[1024];
+    readlink(fd_path, link_path, sizeof(link_path) - 1);
+
+  }
+
+}*/
+
+void create_mount(mount_t * mount, char * path) {
+  sscanf(path, "%s %s %s %s %s %s", mount->device, mount->total, mount->used, mount->available, mount->percent, mount->directory);
+  FILE *file;
+  char line [256];
+  file = fopen("/proc/mounts", "r");
+  while (fgets(line, sizeof(line), file) != NULL) {
+    if (strstr(line, mount->device) != NULL) {
+      sscanf(line, "%*s %*s %s", mount->type);
+      break;
+    }
+  }
+  fclose(file);
+}
 
 int main(int argc, char**argv) {
-  //TODO phys mem
 
   //procinfo_t * self_info = (procinfo_t *) malloc(sizeof(procinfo_t));
   mem_map_info_t * mem_map = (mem_map_info_t *) malloc(sizeof(mem_map_info_t));
 
-  
+  FILE *fp;
+  char path[1035];
+  fp = popen("df -h", "r");
+  mount_t ** mount_list = (mount_t **) malloc(100* sizeof(mount_t*));
+  int count = 0;
+  fgets(path, sizeof(path)-1, fp);
+  while (fgets(path, sizeof(path)-1, fp) != NULL) {
+    mount_t * mount = (mount_t *) malloc(sizeof(mount_t));
+    create_mount(mount, path);
+    mount_list[count] = mount;
+    printf("%s %s %s %s %s %s %s\n", mount->device, mount->directory, mount->type, mount->total, mount->available, mount->used, mount->percent);
+    count++;
+  }
 
   int * pids = get_pid();
   proc_list_t * proc_list = list_view(pids);

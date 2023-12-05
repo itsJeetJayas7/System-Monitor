@@ -87,4 +87,26 @@ typedef struct mem_map_list {
   int count;
 } mem_map_list_t;
 
+typedef struct fd_info {
+  int fd;
+  char type[128];
+  char object[128];
+} fd_info_t;
+
+typedef struct fd_list {
+  fd_info_t fd_array[100];
+  int count;
+} fd_list_t;
+
+typedef struct mount {
+  char device[128];
+  char directory[128];
+  char type[32];
+  char total[32];
+  char available[32];
+  char used[32];
+  char percent[32];
+} mount_t;
+
+
 #endif
