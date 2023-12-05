@@ -7,15 +7,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-void stop_proc(int pid) {
-  kill(pid, 19);
-}
-void continue_proc(int pid) {
-  kill(pid, 18);
-}
-void kill_proc(int pid) {
-  kill(pid, 9);
-}
 
 /* Displays process information of a signal PID */
 void display_proc (long int cpu_time, procinfo_t * info) {
@@ -246,18 +237,19 @@ mem_map_list_t * create_mem_info(int pid) {
     //line buffer
     char line_ph[1024];
     int mem_map_flag = 0;
-    int count = 1;
+    
     mem_map_list_t * smap_list = (mem_map_list_t *) malloc(sizeof(mem_map_list_t));
-    smap_list->maps_list =( mem_map_info_t **) malloc(((count + 10) * sizeof(mem_map_info_t *)));
-    smap_list->count = count;
+    smap_list->count = 0;
+    smap_list->maps_list =( mem_map_info_t **) malloc(((smap_list->count + 10) * sizeof(mem_map_info_t *)));
+    
 
     while (mem_map_flag == 0) {
       
       mem_map_info_t * mem_map = (mem_map_info_t *) malloc(sizeof(mem_map_info_t));
       create_empty_map(mem_map);
 
-      smap_list->maps_list = (mem_map_info_t **) realloc(smap_list->maps_list, ((count + 10) * sizeof(mem_map_info_t *)));
-      smap_list->maps_list[count] = mem_map;
+      smap_list->maps_list = (mem_map_info_t **) realloc(smap_list->maps_list, ((smap_list->count + 10) * sizeof(mem_map_info_t *)));
+      smap_list->maps_list[smap_list->count] = mem_map;
 
       if (fgets(line_ph, sizeof(line_ph), smap_file) != NULL) {
         sscanf(line_ph, "%s %s %s %s %s %s\n", mem_map->VM, mem_map->flags, mem_map->offset, 
@@ -306,7 +298,7 @@ mem_map_list_t * create_mem_info(int pid) {
       //print_mem_map(smap_list->maps_list[count]);
       format_mem_map(mem_map);
       
-      count++;
+      smap_list->count++;
     }
     
   }
@@ -517,6 +509,10 @@ int main(int argc, char**argv) {
   proc_list_t * proc_list = list_view(pids);
 
   mem_map_list_t * mmap_list = create_mem_info(1047644);
+  /*printf("%d\n", mmap_list->count);
+  for (int i = 0; i < mmap_list->count; i++) {
+    printf("vm_start %s\n", mmap_list->maps_list[i]->vm_start);
+  }*/
  /*
  for (int i = 0; pids[i] != 0; i++) {
     if (proc_list->info_list[i] != NULL) {
