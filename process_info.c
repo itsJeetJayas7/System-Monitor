@@ -172,75 +172,138 @@ int create_proc_info (procinfo_t * self_info, int path) {
   
 }
 
+void create_empty_map(mem_map_info_t * map_info) {
+  strcpy(map_info->file_name, "None");
+  strcpy(map_info->VM, "None");
+  strcpy(map_info->size_str, "None");
+  strcpy(map_info->flags, "None");
+  strcpy(map_info->private_clean_str, "None");
+  strcpy(map_info->private_dirt_str, "None");
+  strcpy(map_info->shared_clean_str, "None");
+  strcpy(map_info->shared_dirty_str, "None");
+  strcpy(map_info->vm_start, "None");
+  strcpy(map_info->vm_end, "None");
+  map_info->size = 0;
+  map_info->private_clean = 0;
+  map_info->private_dirty = 0;
+  map_info->shared_clean = 0;
+  map_info->shared_dirty = 0;
+  strcpy(map_info->dev, "None");
+  strcpy(map_info->inode, "None");
+  map_info->kernel_page_size = 0;
+  map_info->mmu_page_size = 0;
+  map_info->rss = 0;
+  map_info->pss = 0;
+  map_info->referenced = 0;
+  map_info->anonymous = 0;
+  map_info->lazy_free = 0;
+  map_info->anon_huge_pages = 0;
+  map_info->shmem_pmd_mapped = 0;
+  map_info->file_pmd_mapped = 0;
+  map_info->shared_hugetlb = 0;
+  map_info->private_hugetlb = 0;
+  map_info->swap = 0;
+  map_info->swap_pss = 0;
+  map_info->locked = 0;
+  map_info->th_peligible = 0;
+  map_info->protection_key = 0;
+}
+
+void format_mem_map(mem_map_info_t * map_info) {
+  
+  // Use strtok to split the string
+  char *token = strtok(map_info->VM, "-");
+  strcpy(map_info->vm_start, token);
+  token = strtok(NULL, "-");
+  strcpy(map_info->vm_end, token);
+  
+  sprintf(map_info->size_str, "%d", map_info->size);
+  sprintf(map_info->private_clean_str, "%d", map_info->private_clean);
+  sprintf(map_info->private_dirt_str, "%d", map_info->private_dirty);
+  sprintf(map_info->shared_clean_str, "%d", map_info->shared_clean);
+  sprintf(map_info->shared_dirty_str, "%d", map_info->shared_dirty);
+  
+}
+
 mem_map_list_t * create_mem_info(int pid) {
   //open statm file path
   char map_path[1024];
   sprintf(map_path,"/proc/%d/smaps", pid);
-  FILE * smap_file = fopen(map_path, "r");
-  
-  //line buffer
-  char line_ph[1024];
-  int mem_map_flag = 0;
-  int count = 1;
-  mem_map_list_t * smap_list = (mem_map_list_t *) malloc(sizeof(mem_map_list_t));
-  smap_list->maps_list =( mem_map_info_t **) malloc(((count + 10) * sizeof(mem_map_info_t *)));
-  smap_list->count = count;
+  FILE * smap_file;
+  if((smap_file = fopen(map_path, "r"))) {
+    //line buffer
+    char line_ph[1024];
+    int mem_map_flag = 0;
+    int count = 1;
+    mem_map_list_t * smap_list = (mem_map_list_t *) malloc(sizeof(mem_map_list_t));
+    smap_list->maps_list =( mem_map_info_t **) malloc(((count + 10) * sizeof(mem_map_info_t *)));
+    smap_list->count = count;
 
-  while (mem_map_flag == 0) {
-    
-    mem_map_info_t * mem_map = (mem_map_info_t *) malloc(sizeof(mem_map_info_t));
-    
-    smap_list->maps_list = (mem_map_info_t **) realloc(smap_list->maps_list, ((count + 10) * sizeof(mem_map_info_t *)));
-    smap_list->maps_list[count] = mem_map;
-
-    if (fgets(line_ph, sizeof(line_ph), smap_file) != NULL) {
-      sscanf(line_ph, "%s %s %s %s %s %s\n", mem_map->VM, mem_map->flags, mem_map->offset, 
-        mem_map->dev, mem_map->inode, mem_map->file_name);
-    }
-    else {
-      mem_map_flag = 1;
+    while (mem_map_flag == 0) {
       
-    }
-    
-    fscanf(smap_file,
-      "Size: %d kB\n"
-      "KernelPageSize: %d kB\n"
-      "MMUPageSize: %d kB\n"
-      "Rss: %d kB\n"
-      "Pss: %d kB\n"
-      "Shared_Clean: %d kB\n"
-      "Shared_Dirty: %d kB\n"
-      "Private_Clean: %d kB\n"
-      "Private_Dirty: %d kB\n"
-      "Referenced: %d kB\n"
-      "Anonymous: %d kB\n"
-      "LazyFree: %d kB\n"
-      "AnonHugePages:  kB\n"
-      "ShmemPmdMapped:  kB\n"
-      "FilePmdMapped:  kB\n"
-      "Shared_Hugetlb: kB\n"
-      "Private_Hugetlb: kB\n"
-      "Swap: kB\n"
-      "SwapPss: kB\n"
-      "Locked: kB\n", 
-    &mem_map->size, &mem_map->kernel_page_size, &mem_map->mmu_page_size, &mem_map->rss, &mem_map->pss, 
-    &mem_map->shared_clean, &mem_map->shared_dirty, &mem_map->private_clean, &mem_map->private_dirty, 
-    &mem_map->referenced, &mem_map->anonymous, &mem_map->lazy_free);
+      mem_map_info_t * mem_map = (mem_map_info_t *) malloc(sizeof(mem_map_info_t));
+      create_empty_map(mem_map);
 
-    
-    for (int i = 0; i < 11; ++i) {
+      smap_list->maps_list = (mem_map_info_t **) realloc(smap_list->maps_list, ((count + 10) * sizeof(mem_map_info_t *)));
+      smap_list->maps_list[count] = mem_map;
+
       if (fgets(line_ph, sizeof(line_ph), smap_file) != NULL) {
-        continue;
+        sscanf(line_ph, "%s %s %s %s %s %s\n", mem_map->VM, mem_map->flags, mem_map->offset, 
+          mem_map->dev, mem_map->inode, mem_map->file_name);
       }
       else {
         mem_map_flag = 1;
-        
+        return smap_list;
       }
+      
+      fscanf(smap_file,
+        "Size: %d kB\n"
+        "KernelPageSize: %d kB\n"
+        "MMUPageSize: %d kB\n"
+        "Rss: %d kB\n"
+        "Pss: %d kB\n"
+        "Shared_Clean: %d kB\n"
+        "Shared_Dirty: %d kB\n"
+        "Private_Clean: %d kB\n"
+        "Private_Dirty: %d kB\n"
+        "Referenced: %d kB\n"
+        "Anonymous: %d kB\n"
+        "LazyFree: %d kB\n"
+        "AnonHugePages:  kB\n"
+        "ShmemPmdMapped:  kB\n"
+        "FilePmdMapped:  kB\n"
+        "Shared_Hugetlb: kB\n"
+        "Private_Hugetlb: kB\n"
+        "Swap: kB\n"
+        "SwapPss: kB\n"
+        "Locked: kB\n", 
+      &mem_map->size, &mem_map->kernel_page_size, &mem_map->mmu_page_size, &mem_map->rss, &mem_map->pss, 
+      &mem_map->shared_clean, &mem_map->shared_dirty, &mem_map->private_clean, &mem_map->private_dirty, 
+      &mem_map->referenced, &mem_map->anonymous, &mem_map->lazy_free);
+
+      
+      for (int i = 0; i < 11; ++i) {
+        if (fgets(line_ph, sizeof(line_ph), smap_file) != NULL) {
+          continue;
+        }
+        else {
+          mem_map_flag = 1;
+          
+        }
+      }
+      //print_mem_map(smap_list->maps_list[count]);
+      format_mem_map(mem_map);
+      
+      count++;
     }
-    print_mem_map(smap_list->maps_list[count]);
-    count++;
+    
   }
-   return smap_list;
+  else {
+    return NULL;
+  }
+  
+  
+   
 }
 
 
@@ -286,7 +349,7 @@ int * get_pid() {
 
 void create_single_process_info( procinfo_t * info) {
   info->pid = -999; 
-  strcpy(info->process_name, "");;
+  strcpy(info->process_name, "");
   info->state = '~'; // R = Running; S = Sleeping, Z = Zombie, I = Idle
   info->ppid = 0; // partent pid
   info->pgrp = 0; // process group id
@@ -336,6 +399,8 @@ proc_list_t * list_view(int * pids) {
   return proc_list;
 }
 
+
+
 int main(int argc, char**argv) {
   //TODO phys mem
 
@@ -347,7 +412,7 @@ int main(int argc, char**argv) {
   int * pids = get_pid();
   proc_list_t * proc_list = list_view(pids);
 
-  mem_map_list_t * mmap_list = create_mem_info(3857618);
+  mem_map_list_t * mmap_list = create_mem_info(1047644);
   
  for (int i = 0; pids[i] != 0; i++) {
     if (proc_list->info_list[i] != NULL) {

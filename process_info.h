@@ -42,23 +42,31 @@ typedef struct proc_list {
 } proc_list_t;
 
 typedef struct mem_map_info {
-
-  
+  char file_name[1024];
   char VM[32];
+  char size_str[32];
   char flags[32];
   char offset[32];
+  char private_clean_str[32];
+  char private_dirt_str[32];
+  char shared_clean_str[32];
+  char shared_dirty_str[32];
+  
+  char vm_start[32];
+  char vm_end[32];
+
+  int size;
+  int private_clean;
+  int private_dirty;
+  int shared_clean;
+  int shared_dirty;
+
   char dev[32];
   char inode[32];
-  char file_name[1024];
-  int size;
   int kernel_page_size;
   int mmu_page_size;
   int rss;
   int pss;
-  int shared_clean;
-  int shared_dirty;
-  int private_clean;
-  int private_dirty;
   int referenced;
   int anonymous;
   int lazy_free;
