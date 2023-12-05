@@ -7,6 +7,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+void stop_proc(int pid) {
+  kill(pid, 19);
+}
+void continue_proc(int pid) {
+  kill(pid, 18);
+}
+void kill_proc(int pid) {
+  kill(pid, 9);
+}
 
 /* Displays process information of a signal PID */
 void display_proc (long int cpu_time, procinfo_t * info) {
