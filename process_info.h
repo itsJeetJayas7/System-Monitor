@@ -1,6 +1,7 @@
 #ifndef PROCESS_INFO_H
 #define PROCESS_INFO_H
 
+
 typedef struct procinfo {
   //fields of stat
   int pid; 
@@ -42,7 +43,7 @@ typedef struct proc_list {
 
 typedef struct mem_map_info {
 
-  //559a193c2000-559a193c4000 r--p 00000000 fd:00 1569845                    /bin/cat
+  
   char VM[32];
   char flags[32];
   char offset[32];
@@ -73,15 +74,9 @@ typedef struct mem_map_info {
   int protection_key;
 }mem_map_info_t;
 
-typedef struct mount {
-  char device[128];
-  char directory[128];
-  char type[32];
-  char total[32];
-  char available[32];
-  char used[32];
-  char percent[32];
-} mount_t;
-
+typedef struct mem_map_list {
+  mem_map_info_t ** maps_list;
+  int count;
+} mem_map_list_t;
 
 #endif
