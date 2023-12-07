@@ -1,8 +1,15 @@
-# CS252-Final-Project
-CS 252 Final Project 
+# CS252-lab6
+CS 252 Lab6
 
 By: Jeet Jayas (jjayas), Kushagra Sharma (sharm629) and Saajan Shah (shah687)
 
+Technologies: Gtk, Glade, c language.
+
+Extra Features: Images incorporated to improve appearance.
+                added an extra filter to get only the running process
+
 To run:
-Step 1 : gcc -o system_monitor system_monitor.c \`pkg-config --cflags --libs gtk+-3.0\`
+
+make
+./system_monitor
 
