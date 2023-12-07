@@ -306,58 +306,86 @@
                 <property name="visible">True</property>
                 <property name="can-focus">False</property>
                 <child>
-                  <object class="GtkScrolledWindow" id="scroll_r">
-                    <property name="width-request">475</property>
-                    <property name="height-request">548</property>
+                  <object class="GtkButton" id="gtk_hist">
+                    <property name="label" translatable="yes">GTK History</property>
                     <property name="visible">True</property>
                     <property name="can-focus">True</property>
-                    <property name="shadow-type">in</property>
-                    <child>
-                      <object class="GtkViewport" id="vp-g">
-                        <property name="name">vp1</property>
-                        <property name="visible">True</property>
-                        <property name="can-focus">False</property>
-                        <child>
-                          <object class="GtkBox" id="gt_box">
-                            <property name="name">gtk_box</property>
-                            <property name="visible">True</property>
-                            <property name="can-focus">False</property>
-                            <property name="orientation">vertical</property>
-                            <child>
-                              <object class="GtkScrolledWindow">
-                                <property name="visible">True</property>
-                                <property name="can-focus">True</property>
-                                <property name="shadow-type">in</property>
-                                <child>
-                                  <object class="GtkViewport" id="viewPortgraph1">
-                                    <property name="visible">True</property>
-                                    <property name="can-focus">False</property>
-                                    <child>
-                                      <placeholder/>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                            <child>
-                              <placeholder/>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
+                    <property name="receives-default">True</property>
+                    <signal name="clicked" handler="on_gtk_hist_clicked" swapped="no"/>
                   </object>
                   <packing>
-                    <property name="x">4</property>
-                    <property name="y">5</property>
+                    <property name="x">199</property>
+                    <property name="y">125</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="mem_hist">
+                    <property name="label" translatable="yes">Memory History</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <signal name="clicked" handler="on_mem_hist_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="x">190</property>
+                    <property name="y">262</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="network">
+                    <property name="label" translatable="yes">Network History</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">True</property>
+                    <property name="receives-default">True</property>
+                    <signal name="clicked" handler="on_network_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="x">192</property>
+                    <property name="y">411</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">CPU HISTORY</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Adelle Sans Devanagari weight=810 20"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="x">45</property>
+                    <property name="y">52</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="width-request">100</property>
+                    <property name="height-request">80</property>
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Memory and Swap History</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Adelle Sans Devanagari weight=810 20"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="x">45</property>
+                    <property name="y">181</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel">
+                    <property name="visible">True</property>
+                    <property name="can-focus">False</property>
+                    <property name="label" translatable="yes">Network History</property>
+                    <attributes>
+                      <attribute name="font-desc" value="Adelle Sans Devanagari weight=810 20"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="x">45</property>
+                    <property name="y">350</property>
                   </packing>
                 </child>
               </object>
