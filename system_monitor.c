@@ -455,7 +455,6 @@ mem_map_list_t * create_mem_info(int pid) {
     
     mem_map_list_t * smap_list = (mem_map_list_t *) malloc(sizeof(mem_map_list_t));
     smap_list->count = 0;
-    g_print("THE COUNT IS FUCIKN ZERO!!!!\n\n\n\n");
     smap_list->maps_list =( mem_map_info_t **) malloc(((smap_list->count + 10) * sizeof(mem_map_info_t *)));
     mem_map_info_t * mem_map = (mem_map_info_t *) malloc(sizeof(mem_map_info_t));
     create_empty_map(mem_map);
@@ -485,7 +484,7 @@ void create_mount(mount_t * mount, char * path) {
   fclose(file);
 }
 
-GtkWidget * window;
+GtkWidget * window_main;
 GtkWidget * button1;
 GtkWidget * label_1;
 GtkWidget * grid1;
@@ -697,6 +696,23 @@ void on_cont_proc_clicked() {
         return EXIT_FAILURE;
     }
 }
+
+int argc_temp;
+char ** argv_temp;
+
+void on_gtk_hist_clicked() {
+  main3(argc_temp, argv_temp);    
+}
+
+void on_mem_hist_clicked() {
+  main4(argc_temp, argv_temp);    
+}
+
+void on_network_clicked() {
+  main2(argc_temp, argv_temp);    
+}
+
+
 
 void get_active_process_table() {
   GtkTreeStore *treeStore_mm = GTK_TREE_STORE(gtk_builder_get_object(builder, "tree_store"));
@@ -1461,7 +1477,7 @@ void setTable(int number, char * type) {
 
 typedef struct {
     GtkWidget *drawing_area;
-    double data[60][8];  // Assuming 8 CPU cores
+    double data[60][8];
     int index;
 } plot_data_st_t;
 
@@ -1472,8 +1488,8 @@ void draw_curve(GtkWidget *widget, cairo_t *cr, plot_data_st_t *plot_data) {
 
     double x_scale = (double)allocation.width / (60 - 1);
     double y_scale = (double)allocation.height / 100.0;
-    for (int type = 0; type < 8; type++) {
-        cairo_set_source_rgb(cr, rand()/100, rand()/100, rand()/100);
+    for (int type = 0; type < 2; type++) {
+        cairo_set_source_rgb(cr, rand() / (double)RAND_MAX, rand() / (double)RAND_MAX, rand() / (double)RAND_MAX);
         cairo_set_line_width(cr, 2.0);
         cairo_move_to(cr, 0, allocation.height - plot_data->data[0][type] * y_scale);
 
@@ -1505,18 +1521,18 @@ gboolean update_plot_callback(gpointer user_data) {
     long long unsigned recv_rate;
     long long unsigned  send_rate;
     int count = 0;
+    char * revData[10];
+    char * sendData[10];
     while (fgets(line, sizeof(line), netdev_file) != NULL) {
-        if (sscanf(line, "%*s %llu %*u %*u %*u %*u %*u %*u %*u %*u %llu %llu %*u %*u %*u %*u %*u %*u %*u %*u %*u %llu", 
+        if (sscanf(line, "%*s %s %*u %*u %*u %*u %*u %*u %*u %*u %s %s %*u %*u %*u %*u %*u %*u %*u %*u %*u %*llu", 
         &recv_bytes, &send_bytes, &recv_packets) == 3) {
             // Calculate rates in kilobytes per second
-            if (count == 1) {
+            if (count == 0) {
                 
                 recv_rate = (recv_bytes) / (1024*1024*1024);
                 send_rate = (send_bytes) / (1024*1024);
                 plot_data->data[plot_data->index][0] = 20;
                 plot_data->data[plot_data->index][1] = 30;
-                
-                printf("Received Rate: %f mb/s\nSent Rate: %f mb/s\n", (double)recv_rate, (double)send_rate);
                 break;
             }
             count++;
@@ -1542,58 +1558,10 @@ char ** argv_t;
 
 static void activate(GtkApplication *app, gpointer user_data) {
     GtkWidget *window;
-
-    getSystemInfo();
-    gtk_init(&argc_t, &argv_t);
-    builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, "gladeTesting.glade", NULL);
-
-    // Connect signals, get widgets, etc.
-
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
-    gtk_builder_connect_signals(builder, NULL);
-
-    grid1 = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
-    button1 = GTK_WIDGET(gtk_builder_get_object(builder, "button1"));
-    //label_1 = GTK_WIDGET(gtk_builder_get_object(builder, "label_1"));
-
-    label_osName = GTK_WIDGET(gtk_builder_get_object(builder, "os_name"));
-    gtk_label_set_text(GTK_LABEL(label_osName), (const gchar *) osName);
-
-    label_version = GTK_WIDGET(gtk_builder_get_object(builder, "os_version"));
-    gtk_label_set_text(GTK_LABEL(label_version), (const gchar *) osVersion);
-
-    label_kernel = GTK_WIDGET(gtk_builder_get_object(builder, "kernel"));
-    gtk_label_set_text(GTK_LABEL(label_kernel), (const gchar *) kernelVersion);
-
-    label_memory = GTK_WIDGET(gtk_builder_get_object(builder, "memory"));
-    gtk_label_set_text(GTK_LABEL(label_memory), (const gchar *) memorySize);
-
-    label_processor = GTK_WIDGET(gtk_builder_get_object(builder, "processor"));
-    gtk_label_set_text(GTK_LABEL(label_processor), (const gchar *) cpuType);
-
-    label_disk = GTK_WIDGET(gtk_builder_get_object(builder, "disk"));
-    gtk_label_set_text(GTK_LABEL(label_disk), (const gchar *) diskInfo);
-
-    GdkColor color;
-    color.red = 32767;   // Half intensity for the red component
-    color.green = 49151; // Three-fourths intensity for the green component
-    color.blue = 49151;
-    gtk_widget_modify_bg(GTK_WIDGET(window), GTK_STATE_NORMAL, &color);
-
-    printf("OS Name: %s\n", osName);
-    printf("OS Release Version: %s\n", osVersion);
-    printf("Kernel Version: %s\n", kernelVersion);
-    printf("Memory Size: %s\n", memorySize);
-    printf("Processor Version: %s\n", cpuType);
-    printf("Total Disk Space: %s\n", diskInfo);
-    
-
     GtkWidget *grid;
     GtkWidget *drawing_area;
 
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "viewPortgraph1"));
+    window = gtk_application_window_new(app);
     gtk_window_set_title(GTK_WINDOW(window), "Network Usage Graph");
     gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
 
@@ -1610,38 +1578,251 @@ static void activate(GtkApplication *app, gpointer user_data) {
     g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(draw_curve), plot_data);
 
     plot_data->drawing_area = drawing_area;
-    setTable(0, NULL);
-
-    set_fs_table();
 
     g_timeout_add(1000, update_plot_callback, plot_data);
-    gtk_widget_show(window);
 
-    gtk_main();
-    
-    return 0;
-
-    //gtk_widget_show_all(window);
+    gtk_widget_show_all(window);
 }
 
-// int main(int argc, char **argv) {
-//     argc_t = argc;
-//     argv_t = argv;
-//     arg
-//     GtkApplication *app;
-//     int status;
-//     //main2(argc, argv);
-//     app = gtk_application_new("org.Netgraph", G_APPLICATION_FLAGS_NONE);
-//     g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+int main2(int argc, char **argv) {
+    GtkApplication *app;
+    int status;
 
-//     status = g_application_run(G_APPLICATION(app), argc, argv);
-//     g_object_unref(app);
+    app = gtk_application_new("org.Netgraph", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(app, "activate", G_CALLBACK(activate), NULL);
+    status = g_application_run(G_APPLICATION(app), argc, argv);
+    g_object_unref(app);
+
     
-// }
+}
+
+void draw_curve3(GtkWidget *widget, cairo_t *cr, plot_data_st_t *plot_data) {
+    GdkRectangle allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+
+    double x_scale = (double)allocation.width / (30 - 1);
+    double y_scale = (double)allocation.height / 100.0;
+    for (int core = 0; core < 8; core++) {
+        cairo_set_source_rgb(cr, rand() / (double)RAND_MAX, rand() / (double)RAND_MAX, rand() / (double)RAND_MAX);
+        cairo_set_line_width(cr, 2.0);
+        cairo_move_to(cr, 0, allocation.height - plot_data->data[0][core] * y_scale);
+
+        for (int i = 1; i < 60; i++) {
+            cairo_line_to(cr, i * x_scale, allocation.height - plot_data->data[i][core] * y_scale);
+        }
+
+        cairo_stroke(cr);
+    }
+}
+
+gboolean update_plot_callback3(gpointer user_data) {
+    plot_data_st_t *plot_data = (plot_data_st_t *)user_data;
+    
+    FILE * stat_file;
+    if((stat_file = fopen("/proc/stat", "r")) == NULL) {
+        perror("Error opening /proc/stat");
+        return;
+    }
+    char line[1024];
+    int count = 0;
+    while (fgets(line, sizeof(line), stat_file) != NULL) {
+        if (strncmp(line, "cpu", 3) == 0) {
+            unsigned long long user, nice, system, idle, iowait, irq, softirq;
+            sscanf(line, "cpu %llu %llu %llu %llu %llu %llu %llu", &user, &nice, &system,
+            &idle, &iowait, &irq, &softirq);
+
+            unsigned long long total_cpu_time = user + nice + system + idle + iowait + irq + softirq;
+            unsigned long long idle_cpu_time = idle + iowait;
+
+            // Calculate CPU usage percentage
+            double idle_cpu_usage = 100.0 * (1.0 - ((double)idle_cpu_time / total_cpu_time));
+	        plot_data->data[plot_data->index][count] = 100 * idle_cpu_usage;
+	    count ++;
+
+        }
+    }
+    fclose(stat_file);
+
+    plot_data->index = (plot_data->index + 1) % 60;
+
+    gtk_widget_queue_draw(plot_data->drawing_area);
+    return TRUE;
+}
+
+static void activate3(GtkApplication *app, gpointer user_data) {
+    GtkWidget *window;
+    GtkWidget *grid;
+    GtkWidget *drawing_area;
+
+    window = gtk_application_window_new(app);
+    gtk_window_set_title(GTK_WINDOW(window), "CPU Usage Graph");
+    gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
+
+    grid = gtk_grid_new();
+    gtk_container_add(GTK_CONTAINER(window), grid);
+
+    plot_data_st_t *plot_data = g_malloc(sizeof(plot_data_st_t));
+    plot_data->index = 0;
+
+    drawing_area = gtk_drawing_area_new();
+    gtk_widget_set_size_request(drawing_area, 600, 400);
+    gtk_grid_attach(GTK_GRID(grid), drawing_area, 0, 0, 1, 1);
+
+    g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(draw_curve3), plot_data);
+
+    plot_data->drawing_area = drawing_area;
+
+    g_timeout_add(3000, update_plot_callback3, plot_data);
+
+    gtk_widget_show_all(window);
+}
+
+int main3(int argc, char **argv) {
+    GtkApplication *app;
+    int status;
+
+    app = gtk_application_new("org.CPUGraph", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(app, "activate", G_CALLBACK(activate3), NULL);
+    status = g_application_run(G_APPLICATION(app), argc, argv);
+    g_object_unref(app);
+
+    
+}
+
+
+void draw_curve4(GtkWidget *widget, cairo_t *cr, plot_data_st_t *plot_data) {
+    GdkRectangle allocation;
+    gtk_widget_get_allocation(widget, &allocation);
+
+    double x_scale = (double)allocation.width / (30 - 1);
+    double y_scale = (double)allocation.height / 100.0;
+    for (int type = 0; type < 8; type++) {
+        cairo_set_source_rgb(cr, rand() / (double)RAND_MAX, rand() / (double)RAND_MAX, rand() / (double)RAND_MAX);
+        cairo_set_line_width(cr, 2.0);
+        cairo_move_to(cr, 0, allocation.height - plot_data->data[0][type] * y_scale);
+
+        for (int i = 1; i < 60; i++) {
+            cairo_line_to(cr, i * x_scale, allocation.height - plot_data->data[i][type] * y_scale);
+        }
+
+        cairo_stroke(cr);
+    }
+}
+
+gboolean update_plot_callback4(gpointer user_data) {
+    plot_data_st_t *plot_data = (plot_data_st_t *)user_data;
+    // Simulate CPU usage data (replace this with actual CPU usage data)
+    FILE* meminfo_file;
+
+    if ((meminfo_file = fopen("/proc/meminfo", "r")) == NULL) {
+        perror("Error opening /proc/meminfo");
+        return;
+    }
+
+    char line[1024];
+    double total_memory;
+    double free_memory;
+    double available_memory;
+    double buff_memory;
+    double cach_memory;
+    double total_swap; 
+    double free_swap;
+    double swap_cach;
+    double used_mem;
+    double used_swap;
+
+    while (fgets(line, sizeof(line), meminfo_file) != NULL) {
+        if (sscanf(line, "MemTotal: %lf kB", &total_memory) == 1) {
+            //printf("Total Memory: %lf kB\n", total_memory);
+        } 
+        else if (sscanf(line, "MemFree: %lf kB", &free_memory) == 1) {
+            //printf("Free Memory: %lf kB\n", free_memory);
+        } 
+        else if (sscanf(line, "MemAvailable: %lf kB", &available_memory) == 1) {
+            //printf("Available Memory: %lu kB\n", available_memory);
+        } 
+        else if (sscanf(line, "Buffers:: %lf kB", &buff_memory) == 1) {
+            //printf("Buff Memory: %lf kB\n", buff_memory);
+        }
+        else if (sscanf(line, "Cached: %lf kB", &cach_memory) == 1) {
+            //printf("Cach Memory: %lf kB\n", cach_memory);
+        }
+        else if (sscanf(line, "SwapTotal: %lf kB", &total_swap) == 1) {
+            //printf("Total Swap: %lu kB\n", total_swap);
+        } 
+        else if (sscanf(line, "SwapFree: %lf kB", &free_swap) == 1) {
+            //printf("Free Swap: %lu kB\n", free_swap);
+        }
+        else if (sscanf(line, "MemAvailable: %lf kB", &swap_cach) == 1) {
+            //printf("SwapCached: %lu kB\n",  swap_cach);
+        }
+    } 
+
+    used_mem = total_memory - (free_memory + buff_memory); 
+    used_swap = total_swap - swap_cach;
+    
+    double percent_memory = (double)used_mem / total_memory;
+    percent_memory = percent_memory *100;
+    double percent_swap = (double) used_swap / total_swap;
+    percent_swap = percent_swap * 100;
+    plot_data->data[plot_data->index][0] = percent_memory;
+    plot_data->data[plot_data->index][1] = percent_memory;
+    fclose(meminfo_file);
+
+    plot_data->index = (plot_data->index + 1) % 60;
+
+    gtk_widget_queue_draw(plot_data->drawing_area);
+    return TRUE;
+}
+
+static void activate4(GtkApplication *app, gpointer user_data) {
+    GtkWidget *window;
+    GtkWidget *grid;
+    GtkWidget *drawing_area;
+
+    window = gtk_application_window_new(app);
+    gtk_window_set_title(GTK_WINDOW(window), "Memory Usage Graph");
+    gtk_window_set_default_size(GTK_WINDOW(window), 800, 600);
+
+    grid = gtk_grid_new();
+    gtk_container_add(GTK_CONTAINER(window), grid);
+
+    plot_data_st_t *plot_data = g_malloc(sizeof(plot_data_st_t));
+    plot_data->index = 0;
+
+    drawing_area = gtk_drawing_area_new();
+    gtk_widget_set_size_request(drawing_area, 600, 400);
+    gtk_grid_attach(GTK_GRID(grid), drawing_area, 0, 0, 1, 1);
+
+    g_signal_connect(G_OBJECT(drawing_area), "draw", G_CALLBACK(draw_curve4), plot_data);
+
+    plot_data->drawing_area = drawing_area;
+
+    g_timeout_add(3000, update_plot_callback4, plot_data);
+
+    gtk_widget_show_all(window);
+}
+
+int main4(int argc, char **argv) {
+    GtkApplication *app;
+    int status;
+
+    app = gtk_application_new("org.Memorygraph", G_APPLICATION_FLAGS_NONE | G_APPLICATION_FLAGS_NONE);
+    g_signal_connect(app, "activate", G_CALLBACK(activate4), NULL);
+    status = g_application_run(G_APPLICATION(app), argc, argv);
+    g_object_unref(app);
+
+    
+}
+ 
+
+
  
 
 int main(int argc, char *argv[]) {
     
+    argc_temp = argc;
+    argv_temp = argv;
     getSystemInfo();
     gtk_init(&argc, &argv);
     builder = gtk_builder_new();
@@ -1649,8 +1830,8 @@ int main(int argc, char *argv[]) {
 
     // Connect signals, get widgets, etc.
 
-    window = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
-    g_signal_connect(window, "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    window_main = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
+    g_signal_connect(window_main, "destroy", G_CALLBACK(gtk_main_quit), NULL);
     gtk_builder_connect_signals(builder, NULL);
 
     grid1 = GTK_WIDGET(gtk_builder_get_object(builder, "main_window"));
@@ -1679,7 +1860,7 @@ int main(int argc, char *argv[]) {
     color.red = 32767;   // Half intensity for the red component
     color.green = 49151; // Three-fourths intensity for the green component
     color.blue = 49151;
-    gtk_widget_modify_bg(GTK_WIDGET(window), GTK_STATE_NORMAL, &color);
+    gtk_widget_modify_bg(GTK_WIDGET(window_main), GTK_STATE_NORMAL, &color);
 
     printf("OS Name: %s\n", osName);
     printf("OS Release Version: %s\n", osVersion);
@@ -1692,7 +1873,7 @@ int main(int argc, char *argv[]) {
 
     set_fs_table();
     
-    gtk_widget_show(window);
+    gtk_widget_show(window_main);
 
     gtk_main();
     
